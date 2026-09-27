@@ -145,9 +145,9 @@ function HelpNow() {
                 ) : null}
               </div>
             ))
-          ) : (
+          ) : canton ? (
             <p className="text-base text-muted-foreground">{copy.help.regional.placeholder}</p>
-          )}
+          ) : null}
           <p className="text-sm text-muted-foreground">{copy.help.regional.noLocation}</p>
         </div>
       </section>

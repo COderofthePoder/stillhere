@@ -34,8 +34,8 @@ export function CrisisSupport({
           <div>
             <p className="text-base text-muted-foreground">{title}</p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">{resource.phone}</p>
-            {!compact && resource.description ? (
-              <p className="mt-3 text-base text-muted-foreground">{resource.description}</p>
+            {!compact && (copy.resources[resource.id] ?? resource.description) ? (
+              <p className="mt-3 text-base text-muted-foreground">{copy.resources[resource.id] ?? resource.description}</p>
             ) : null}
           </div>
           <div className="mt-auto flex flex-wrap items-center gap-3">
