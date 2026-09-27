@@ -3,13 +3,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { Feedback } from "@/components/chat/Feedback";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
+  EmergencyBar,
   HighSupportCard,
   ImmediateSupportCard,
   SafetyPlanNudge,
 } from "@/components/chat/SafetyBanners";
 import { Button, buttonClasses } from "@/components/ui/action-button";
-import { useCopy } from "@/i18n";
+import { isLocale, useCopy, useLocale } from "@/i18n";
 import { readLocal, removeLocal, STORAGE_KEYS, writeLocal } from "@/lib/local-storage";
 import { atLeast, type SafetyLevel } from "@/lib/safety/levels";
 import { newId } from "@/lib/safety-plan";
@@ -36,6 +38,8 @@ type ChatMessage = { id: string; role: "user" | "assistant"; content: string };
 
 function ChatPage() {
   const copy = useCopy();
+  const { locale, setLocale } = useLocale();
+  const [noNumbers, setNoNumbers] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -93,7 +97,8 @@ function ChatPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages: history.map(({ role, content }) => ({ role, content })),
-            locale: "de",
+            locale,
+            preferences: { noNumbers },
           }),
         });
 
@@ -101,11 +106,15 @@ function ChatPage() {
 
         const nextLevel = (response.headers.get("X-Safety-Level") as SafetyLevel | null) ?? "LOW";
         setLevel(nextLevel);
+        const replyLanguage = response.headers.get("X-Reply-Language");
+        if (isLocale(replyLanguage) && replyLanguage !== locale) setLocale(replyLanguage);
+        const declines = response.headers.get("X-Declines-Numbers") === "1" || noNumbers;
+        if (declines) setNoNumbers(true);
         if (nextLevel === "IMMEDIATE" && !immediateShown) {
           setShowImmediate(true);
           setImmediateShown(true);
         }
-        if (atLeast(nextLevel, "HIGH")) setShowHigh(true);
+        if (atLeast(nextLevel, "HIGH") && !declines) setShowHigh(true);
 
         setMessages((current) => [...current, { id: assistantId, role: "assistant", content: "" }]);
 
@@ -130,7 +139,7 @@ function ChatPage() {
         inputRef.current?.focus();
       }
     },
-    [messages, streaming, immediateShown],
+    [messages, streaming, immediateShown, locale, setLocale, noNumbers],
   );
 
   const togglePersist = () => {
@@ -147,6 +156,7 @@ function ChatPage() {
     setShowHigh(false);
     setShowImmediate(false);
     setImmediateShown(false);
+    setNoNumbers(false);
     setShowFeedback(false);
     removeLocal(STORAGE_KEYS.chat);
   };
@@ -161,7 +171,8 @@ function ChatPage() {
               {copy.chat.subtitle} · {copy.chat.aiNote}
             </span>
           </Link>
-          <Link to="/help" className={buttonClasses("urgentQuiet", "sm", "ml-auto shrink-0")}>
+          <LanguageSwitcher className="ml-auto shrink-0" />
+          <Link to="/help" className={buttonClasses("urgentQuiet", "sm", "shrink-0")}>
             {copy.chat.helpNow}
           </Link>
         </div>
@@ -226,7 +237,8 @@ function ChatPage() {
 
       <footer className="shrink-0 border-t border-border bg-card/80 px-4 pb-[env(safe-area-inset-bottom)] pt-3 backdrop-blur">
         {showImmediate ? <ImmediateSupportCard onStay={() => setShowImmediate(false)} /> : null}
-        {showHigh && !showImmediate ? <HighSupportCard onDismiss={() => setShowHigh(false)} /> : null}
+        {immediateShown && !showImmediate ? <EmergencyBar /> : null}
+        {showHigh && !immediateShown ? <HighSupportCard onDismiss={() => setShowHigh(false)} /> : null}
 
         <form
           className="mx-auto flex w-full max-w-2xl items-end gap-2"
