@@ -122,13 +122,10 @@ const HIGH_PATTERNS = [
   "ich will sterben",
   "ich will nicht mehr leben",
   "mich umbringen",
-  "suizid",
-  "selbstmord",
   "ich halte es nicht mehr aus",
   "i want to die",
   "kill myself",
   "end my life",
-  "suicide",
   "i have a plan",
   "je veux mourir",
   "me suicider",
@@ -138,10 +135,13 @@ const HIGH_PATTERNS = [
   "uccidermi",
   "suicidarmi",
   "farla finita",
-  "suicidio",
 ];
 
 const ELEVATED_PATTERNS = [
+  "suizid",
+  "selbstmord",
+  "suicide",
+  "suicidio",
   "suizidgedanken",
   "nicht mehr da sein",
   "verschwinden",
@@ -170,16 +170,16 @@ const ELEVATED_PATTERNS = [
 ];
 
 const INTENT = [
-  "umbringen", "mich töten", "mir das leben nehmen", "suizid", "selbstmord",
-  "kill myself", "end my life", "suicide", "take my life",
+  "mich umbringen", "mich töten", "mir das leben nehmen",
+  "kill myself", "end my life", "take my life",
   "me suicider", "me tuer", "en finir",
   "uccidermi", "suicidarmi", "togliermi la vita", "farla finita",
 ];
 const NOW = [
-  "jetzt", "heute nacht", "heute abend", "heute noch", "gleich", "in einer stunde",
-  "tonight", "right now", "today", "in an hour",
-  "ce soir", "cette nuit", "maintenant", "aujourd'hui",
-  "stasera", "stanotte", "adesso", "oggi",
+  "jetzt", "heute nacht", "heute abend", "heute noch", "in einer stunde",
+  "tonight", "right now", "in an hour",
+  "ce soir", "cette nuit", "maintenant",
+  "stasera", "stanotte", "adesso",
 ];
 const MEANS = [
   "tabletten gesammelt", "tabletten gespart", "tabletten zusammen", "strick", "seil", "waffe", "pistole",
