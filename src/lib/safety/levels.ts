@@ -22,6 +22,14 @@ export type SafetySignals = {
   declinesNumbers: boolean;
   ambivalence: boolean;
   formal: boolean;
+  /** Likely 25 or younger (school, parents, stated age): 147 fits. */
+  young: boolean;
+  /** Method involves pills, substances or poison: 145 is relevant. */
+  ingestion: boolean;
+  /** The person is about to leave the chat. */
+  leaving: boolean;
+  /** The latest message says the acute danger has eased. */
+  deescalated: boolean;
 };
 
 export const NO_SIGNALS: SafetySignals = {
@@ -35,6 +43,10 @@ export const NO_SIGNALS: SafetySignals = {
   declinesNumbers: false,
   ambivalence: false,
   formal: false,
+  young: false,
+  ingestion: false,
+  leaving: false,
+  deescalated: false,
 };
 
 export type ReplyLanguage = "de" | "fr" | "it" | "en";
@@ -199,6 +211,41 @@ const DECLINES_NUMBERS = [
   "pas de numéros", "niente numeri", "nessun numero",
 ];
 
+const YOUNG = [
+  "schule", "lehrer", "lehrerin", "meine eltern", "mama", "papa", "klasse", "gymi", "lehrstelle", "stifti", "sek ",
+  "school", "my parents", "my mom", "my dad", "teacher", "classmates",
+  "école", "collège", "mes parents", "prof ",
+  "scuola", "i miei genitori", "prof ",
+];
+const INGESTION = [
+  "tablette", "pillen", "medikament", "überdosis", "gift", "schlafmittel", "substanz",
+  "pill", "overdose", "poison", "medication",
+  "médicament", "cachet", "surdose", "poison",
+  "pastiglie", "farmaci", "overdose", "veleno",
+];
+const LEAVING = [
+  "ich geh off", "geh off", "bin off", "muss los", "muss gehen", "tschüss", "bye", "gute nacht", "ciao",
+  "gotta go", "i'm off", "have to go", "je dois y aller", "je m'en vais", "devo andare", "vado via",
+];
+const DEESCALATED = [
+  "blutet kaum", "blutet nicht mehr", "aufgehört zu bluten", "sanität ist da", "krankenwagen ist da", "ambulanz ist da",
+  "bin im spital", "bin auf dem notfall", "weggelegt", "weggeworfen", "weggegeben", "abgegeben", "ist jetzt bei mir",
+  "barely bleeding", "stopped bleeding", "ambulance is here", "threw them away", "gave them away", "is with me now",
+  "ne saigne plus", "saigne à peine", "l'ambulance est là", "je les ai jetés",
+  "non sanguina più", "sanguina appena", "l'ambulanza è qui", "le ho buttate",
+];
+
+/** "Sie" only for a clear direct address; lower-case "sie" usually means other people. */
+export function detectFormal(text: string): boolean {
+  if (/\b(du|dir|dich|dein|deine)\b/i.test(text)) return false;
+  return (
+    /\b(Ihnen|Ihre|Ihr|Ihrer|Ihren)\b/.test(text) ||
+    /\b(Können|Könnten|Würden|Sind|Haben|Dürfen|Kann ich|Darf ich|danke|Danke) Sie\b/.test(text) ||
+    /\b(vous|votre|vos)\b/i.test(text) ||
+    /\b(Lei|Le posso|La ringrazio)\b/.test(text)
+  );
+}
+
 function hits(haystack: string, list: string[]): string[] {
   return list.filter((word) => haystack.includes(word));
 }
@@ -233,7 +280,11 @@ export function heuristicSafety(text: string): SafetyAssessment {
     means: hits(haystack, MEANS).length > 0,
     lossToSuicide: hits(haystack, LOSS).length > 0,
     declinesNumbers: hits(haystack, DECLINES_NUMBERS).length > 0,
-    formal: /\b(sie|ihnen|ihr(e|en)?)\b/.test(haystack) && !/\bdu\b|\bdir\b|\bdich\b/.test(haystack),
+    formal: detectFormal(text),
+    young: hits(haystack, YOUNG).length > 0 || /\b(ich bin|i'?m|j'ai|ho) (1[0-9]|2[0-5])\b/.test(haystack),
+    ingestion: hits(haystack, INGESTION).length > 0,
+    leaving: hits(haystack, LEAVING).length > 0,
+    deescalated: hits(haystack, DEESCALATED).length > 0,
   };
   // Stated intent with a "now" timeframe, or saved means with a timeframe, is immediate.
   if (intent && signals.timeframe) {
@@ -247,6 +298,12 @@ export function heuristicSafety(text: string): SafetyAssessment {
   if (signals.lossToSuicide) {
     level = higherLevel(level, "ELEVATED");
     triggers.push("loss-to-suicide");
+  }
+
+  // "It barely bleeds now" still contains "ich blute": eased danger stays HIGH, not IMMEDIATE.
+  if (signals.deescalated && level === "IMMEDIATE") {
+    level = "HIGH";
+    triggers.push("deescalated");
   }
 
   return { level, confidence: triggers.length > 0 ? 0.5 : 0.3, triggers, signals, language: null };

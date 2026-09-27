@@ -19,3 +19,5 @@
 - Locale lives in `LocaleProvider` (src/i18n/index.ts, device-stored); `de.ts` defines the `Copy` shape, fr/it/en must match it. Why: one type keeps all four languages complete.
 - The safety classifier returns structured `SafetySignals`; `levelFromSignals` (intent + plan/means + time/means → IMMEDIATE) is a floor like `heuristicSafety`. Why: the card and the reply come from one assessment.
 - `/api/chat` returns `X-Reply-Language` and `X-Declines-Numbers`; the chat UI follows them. Why: reply in the person's language and respect a no-numbers wish.
+- Formality defaults to "du"; `detectFormal` only counts direct address (Ihnen/Ihr, "Können Sie", vous, Lei), and the chat UI locks it after the first reply. Why: lower-case "sie" usually means other people.
+- Crisis cards take a `CardContext` (formal, young, ingestion, hasPlan) from `/api/chat` headers: 147 only if young, 145 only if ingestion, own plan first if hasTherapist. `deescalated` in the latest message lets IMMEDIATE drop; the 144 bar hides after 2 calm replies. Why: numbers must fit the person.

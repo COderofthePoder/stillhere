@@ -1,4 +1,5 @@
 # Roadmap — persona review fixes
+- [x] Second review: Sie/du detection, cards fit age/tone/method, red card can calm down, own crisis plan first, short goodbyes
 - [x] Multilingual site + chat (de/fr/it/en)
 - [x] Crisis card matches risk (plan+intent+time → 144, sticky bar)
 - [x] Chronic suicidality / CAMS-DBT prompt, loss-to-suicide signal, no-numbers preference
