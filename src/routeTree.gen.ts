@@ -10,33 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as HelpSomeoneRouteImport } from './routes/help-someone'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SafetyPlanRouteImport } from './routes/safety-plan'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiSafetyCheckRouteImport } from './routes/api/safety-check'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpSomeoneRoute = HelpSomeoneRouteImport.update({
+  id: '/help-someone',
+  path: '/help-someone',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SafetyPlanRoute = SafetyPlanRouteImport.update({
+  id: '/safety-plan',
+  path: '/safety-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSafetyCheckRoute = ApiSafetyCheckRouteImport.update({
+  id: '/api/safety-check',
+  path: '/api/safety-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/chat': typeof ChatRoute
+  '/help': typeof HelpRoute
+  '/help-someone': typeof HelpSomeoneRoute
+  '/privacy': typeof PrivacyRoute
+  '/safety-plan': typeof SafetyPlanRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/safety-check': typeof ApiSafetyCheckRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/chat': typeof ChatRoute
+  '/help': typeof HelpRoute
+  '/help-someone': typeof HelpSomeoneRoute
+  '/privacy': typeof PrivacyRoute
+  '/safety-plan': typeof SafetyPlanRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/safety-check': typeof ApiSafetyCheckRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/chat': typeof ChatRoute
+  '/help': typeof HelpRoute
+  '/help-someone': typeof HelpSomeoneRoute
+  '/privacy': typeof PrivacyRoute
+  '/safety-plan': typeof SafetyPlanRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/safety-check': typeof ApiSafetyCheckRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/chat'
+    | '/help'
+    | '/help-someone'
+    | '/privacy'
+    | '/safety-plan'
+    | '/api/chat'
+    | '/api/safety-check'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/chat'
+    | '/help'
+    | '/help-someone'
+    | '/privacy'
+    | '/safety-plan'
+    | '/api/chat'
+    | '/api/safety-check'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/chat'
+    | '/help'
+    | '/help-someone'
+    | '/privacy'
+    | '/safety-plan'
+    | '/api/chat'
+    | '/api/safety-check'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  ChatRoute: typeof ChatRoute
+  HelpRoute: typeof HelpRoute
+  HelpSomeoneRoute: typeof HelpSomeoneRoute
+  PrivacyRoute: typeof PrivacyRoute
+  SafetyPlanRoute: typeof SafetyPlanRoute
+  ApiChatRoute: typeof ApiChatRoute
+  ApiSafetyCheckRoute: typeof ApiSafetyCheckRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +156,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help-someone': {
+      id: '/help-someone'
+      path: '/help-someone'
+      fullPath: '/help-someone'
+      preLoaderRoute: typeof HelpSomeoneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/safety-plan': {
+      id: '/safety-plan'
+      path: '/safety-plan'
+      fullPath: '/safety-plan'
+      preLoaderRoute: typeof SafetyPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/safety-check': {
+      id: '/api/safety-check'
+      path: '/api/safety-check'
+      fullPath: '/api/safety-check'
+      preLoaderRoute: typeof ApiSafetyCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  ChatRoute: ChatRoute,
+  HelpRoute: HelpRoute,
+  HelpSomeoneRoute: HelpSomeoneRoute,
+  PrivacyRoute: PrivacyRoute,
+  SafetyPlanRoute: SafetyPlanRoute,
+  ApiChatRoute: ApiChatRoute,
+  ApiSafetyCheckRoute: ApiSafetyCheckRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
