@@ -60,6 +60,7 @@ export type Database = {
           available_24_7: boolean
           canton: string | null
           category: string
+          chat_url: string | null
           created_at: string
           description: string
           id: string
@@ -67,6 +68,7 @@ export type Database = {
           name: string
           phone: string | null
           slug: string
+          sms: string | null
           sort_order: number
           url: string | null
         }
@@ -76,6 +78,7 @@ export type Database = {
           available_24_7?: boolean
           canton?: string | null
           category: string
+          chat_url?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -83,6 +86,7 @@ export type Database = {
           name: string
           phone?: string | null
           slug: string
+          sms?: string | null
           sort_order?: number
           url?: string | null
         }
@@ -92,6 +96,7 @@ export type Database = {
           available_24_7?: boolean
           canton?: string | null
           category?: string
+          chat_url?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -99,6 +104,7 @@ export type Database = {
           name?: string
           phone?: string | null
           slug?: string
+          sms?: string | null
           sort_order?: number
           url?: string | null
         }
