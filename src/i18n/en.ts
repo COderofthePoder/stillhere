@@ -87,6 +87,7 @@ export const en: Copy = {
     youthTitle: "Children and young people",
     youthCta: "Contact 147",
     call: "call",
+    callPattern: "Call {n}",
     crisisChatCta: "Open 143 chat",
     youthSmsCta: "147 by SMS",
     youthChatCta: "147 chat & WhatsApp",

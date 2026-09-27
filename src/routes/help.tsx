@@ -85,7 +85,7 @@ function HelpNow() {
               size="lg"
               className="w-full sm:w-auto"
             >
-              {resource.phone} {copy.crisis.call}
+              {copy.crisis.callPattern.replace("{n}", resource.phone ?? "")}
             </PhoneLink>
             {resource.chatUrl || resource.sms ? (
               <div className="flex w-full flex-wrap items-center gap-3">
@@ -140,7 +140,7 @@ function HelpNow() {
                 <p className="mt-1 text-base text-muted-foreground">{resource.description}</p>
                 {resource.phone ? (
                   <PhoneLink phone={resource.phone} variant="primary" size="sm" className="mt-3">
-                    {resource.phone} {copy.crisis.call}
+                    {copy.crisis.callPattern.replace("{n}", resource.phone ?? "")}
                   </PhoneLink>
                 ) : null}
               </div>

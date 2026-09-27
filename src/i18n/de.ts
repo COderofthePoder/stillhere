@@ -94,6 +94,7 @@ export const de = {
     youthTitle: "Kinder und Jugendliche",
     youthCta: "147 kontaktieren",
     call: "anrufen",
+    callPattern: "{n} anrufen",
     crisisChatCta: "143 Chat öffnen",
     youthSmsCta: "147 per SMS",
     youthChatCta: "147 Chat & WhatsApp",
