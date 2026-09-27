@@ -97,5 +97,13 @@ export function heuristicSafety(text: string): SafetyAssessment {
     }
   }
 
+  // Stated intent together with a timeframe of "now" is treated as immediate.
+  const intent = ["umbringen", "mich töten", "mir das leben nehmen", "suizid", "selbstmord"];
+  const now = ["jetzt", "heute nacht", "heute abend", "heute noch", "gleich", "in einer stunde"];
+  if (intent.some((word) => haystack.includes(word)) && now.some((word) => haystack.includes(word))) {
+    level = higherLevel(level, "IMMEDIATE");
+    triggers.push("intent+timeframe");
+  }
+
   return { level, confidence: triggers.length > 0 ? 0.5 : 0.3, triggers };
 }
