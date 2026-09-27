@@ -34,10 +34,16 @@ export async function analyzeSafety(
   latestMessage: string,
   recentContext: string[] = [],
 ): Promise<SafetyAssessment> {
-  const floor = heuristicSafety([...recentContext.slice(-6), latestMessage].join("\n"));
-  // Formality should reflect how the person writes now, not the whole thread.
-  floor.signals.formal = heuristicSafety(latestMessage).signals.formal;
-  floor.level = higherLevel(floor.level, levelFromSignals(floor.signals));
+  const latestOnly = heuristicSafety(latestMessage);
+  // When the latest message says the danger has eased, older context must not pin the level.
+  const floor = latestOnly.signals.deescalated
+    ? latestOnly
+    : heuristicSafety([...recentContext.slice(-6), latestMessage].join("\n"));
+  // These describe how the person writes and what they do right now, not the whole thread.
+  floor.signals.formal = latestOnly.signals.formal;
+  floor.signals.leaving = latestOnly.signals.leaving;
+  floor.signals.deescalated = latestOnly.signals.deescalated;
+  if (!floor.signals.deescalated) floor.level = higherLevel(floor.level, levelFromSignals(floor.signals));
 
   try {
     const { provider } = createGateway();
@@ -72,12 +78,15 @@ export async function analyzeSafety(
       ? parsed.triggers.filter((entry): entry is string => typeof entry === "string").slice(0, 6)
       : [];
     const modelSignals = parseSignals(parsed.signals);
-    const signals = mergeSignals(modelSignals, { ...floor.signals, formal: false });
-    signals.formal = modelSignals.formal || floor.signals.formal;
+    const signals = mergeSignals(modelSignals, { ...floor.signals, formal: false, deescalated: false });
+    // Formal only when both agree or the heuristic sees a clear direct address; default is "du".
+    signals.formal = floor.signals.formal;
+    signals.deescalated = modelSignals.deescalated || floor.signals.deescalated;
 
-    // The deterministic heuristic and signal rules can only raise the level.
+    // The deterministic heuristic and signal rules can only raise the level,
+    // except when the latest message says the acute danger has eased.
     let level = higherLevel(parsed.level, floor.level);
-    level = higherLevel(level, levelFromSignals(signals));
+    if (!signals.deescalated) level = higherLevel(level, levelFromSignals(signals));
 
     return {
       level,
