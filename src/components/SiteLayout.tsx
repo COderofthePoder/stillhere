@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useCopy } from "@/i18n";
 import { cn } from "@/lib/utils";
 
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ButtonLink } from "./ui/action-button";
 
 const NAV_LINK = "rounded-md px-2 py-2 text-base text-muted-foreground transition-colors hover:text-foreground";
@@ -40,6 +41,7 @@ export function SiteHeader() {
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <LanguageSwitcher />
           <ButtonLink
             to="/help"
             variant="urgentQuiet"
@@ -93,7 +95,7 @@ export function SiteFooter() {
     <footer className="border-t border-border/70">
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-5 py-8 text-base text-muted-foreground">
         <Link to="/about" className="rounded-md hover:text-foreground">
-          Über StillHere
+          {copy.nav.about}
         </Link>
         <Link to="/privacy" className="rounded-md hover:text-foreground">
           {copy.privacy.title}
