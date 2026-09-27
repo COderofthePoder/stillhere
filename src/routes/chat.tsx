@@ -8,6 +8,7 @@ import {
   EmergencyBar,
   HighSupportCard,
   ImmediateSupportCard,
+  type CardContext,
   SafetyPlanNudge,
 } from "@/components/chat/SafetyBanners";
 import { Button, buttonClasses } from "@/components/ui/action-button";
@@ -49,6 +50,15 @@ function ChatPage() {
   const [showImmediate, setShowImmediate] = useState(false);
   const [immediateShown, setImmediateShown] = useState(false);
   const [persist, setPersist] = useState(false);
+  // Form of address is locked after the first reply so it never flips mid-conversation.
+  const [formal, setFormal] = useState<boolean | null>(null);
+  const [cardContext, setCardContext] = useState<CardContext>({
+    formal: false,
+    young: false,
+    ingestion: false,
+    hasPlan: false,
+  });
+  const [calmStreak, setCalmStreak] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackDone, setFeedbackDone] = useState(false);
   const sessionId = useMemo(() => newId() + newId(), []);
@@ -98,7 +108,7 @@ function ChatPage() {
           body: JSON.stringify({
             messages: history.map(({ role, content }) => ({ role, content })),
             locale,
-            preferences: { noNumbers },
+            preferences: { noNumbers, ...(formal === null ? {} : { formal }) },
           }),
         });
 
@@ -110,9 +120,30 @@ function ChatPage() {
         if (isLocale(replyLanguage) && replyLanguage !== locale) setLocale(replyLanguage);
         const declines = response.headers.get("X-Declines-Numbers") === "1" || noNumbers;
         if (declines) setNoNumbers(true);
-        if (nextLevel === "IMMEDIATE" && !immediateShown) {
-          setShowImmediate(true);
-          setImmediateShown(true);
+        const flag = (name: string) => response.headers.get(name) === "1";
+        const lockedFormal = formal ?? flag("X-Formal");
+        if (formal === null) setFormal(lockedFormal);
+        setCardContext((current) => ({
+          formal: lockedFormal,
+          young: current.young || flag("X-Young"),
+          ingestion: current.ingestion || flag("X-Ingestion"),
+          hasPlan: current.hasPlan || flag("X-Has-Plan"),
+        }));
+
+        if (nextLevel === "IMMEDIATE") {
+          setCalmStreak(0);
+          // Show the full card again when the danger returns after it had eased.
+          if (!immediateShown) {
+            setShowImmediate(true);
+            setImmediateShown(true);
+          }
+        } else if (immediateShown) {
+          const calm = flag("X-Deescalated") || !atLeast(nextLevel, "HIGH") ? calmStreak + 1 : 0;
+          setCalmStreak(calm);
+          if (calm >= 2) {
+            setImmediateShown(false);
+            setShowImmediate(false);
+          }
         }
         if (atLeast(nextLevel, "HIGH") && !declines) setShowHigh(true);
 
@@ -139,7 +170,7 @@ function ChatPage() {
         inputRef.current?.focus();
       }
     },
-    [messages, streaming, immediateShown, locale, setLocale, noNumbers],
+    [messages, streaming, immediateShown, locale, setLocale, noNumbers, formal, calmStreak],
   );
 
   const togglePersist = () => {
@@ -157,6 +188,9 @@ function ChatPage() {
     setShowImmediate(false);
     setImmediateShown(false);
     setNoNumbers(false);
+    setFormal(null);
+    setCalmStreak(0);
+    setCardContext({ formal: false, young: false, ingestion: false, hasPlan: false });
     setShowFeedback(false);
     removeLocal(STORAGE_KEYS.chat);
   };
@@ -220,7 +254,7 @@ function ChatPage() {
             </ul>
           ) : null}
 
-          {level === "ELEVATED" ? <SafetyPlanNudge /> : null}
+          {level === "ELEVATED" ? <SafetyPlanNudge formal={cardContext.formal} /> : null}
           {showFeedback && !feedbackDone ? (
             <Feedback
               sessionId={sessionId}
@@ -236,9 +270,9 @@ function ChatPage() {
       </main>
 
       <footer className="shrink-0 border-t border-border bg-card/80 px-4 pb-[env(safe-area-inset-bottom)] pt-3 backdrop-blur">
-        {showImmediate ? <ImmediateSupportCard onStay={() => setShowImmediate(false)} /> : null}
-        {immediateShown && !showImmediate ? <EmergencyBar /> : null}
-        {showHigh && !immediateShown ? <HighSupportCard onDismiss={() => setShowHigh(false)} /> : null}
+        {showImmediate ? <ImmediateSupportCard context={cardContext} onStay={() => setShowImmediate(false)} /> : null}
+        {immediateShown && !showImmediate ? <EmergencyBar context={cardContext} /> : null}
+        {showHigh && !immediateShown ? <HighSupportCard context={cardContext} onDismiss={() => setShowHigh(false)} /> : null}
 
         <form
           className="mx-auto flex w-full max-w-2xl items-end gap-2"

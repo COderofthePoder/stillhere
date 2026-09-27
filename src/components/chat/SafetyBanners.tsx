@@ -22,7 +22,7 @@ export function HighSupportCard({ onDismiss, context }: { onDismiss: () => void;
   const copy = useCardCopy(context.formal);
   const crisis = (
     <>
-      <a key="143" href={telHref(CRISIS_LINE.phone!)} className={buttonClasses(context.young ? "secondary" : "primary", "sm")}>
+      <a href={telHref(CRISIS_LINE.phone!)} className={buttonClasses(context.young ? "secondary" : "primary", "sm")}>
         {copy.crisis.crisisCta}
       </a>
       {CRISIS_LINE.chatUrl ? (
