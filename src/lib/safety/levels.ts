@@ -300,5 +300,11 @@ export function heuristicSafety(text: string): SafetyAssessment {
     triggers.push("loss-to-suicide");
   }
 
+  // "It barely bleeds now" still contains "ich blute": eased danger stays HIGH, not IMMEDIATE.
+  if (signals.deescalated && level === "IMMEDIATE") {
+    level = "HIGH";
+    triggers.push("deescalated");
+  }
+
   return { level, confidence: triggers.length > 0 ? 0.5 : 0.3, triggers, signals, language: null };
 }
