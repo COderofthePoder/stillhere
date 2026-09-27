@@ -1,4 +1,4 @@
-import { generateText } from "ai";
+import { streamText } from "ai";
 
 import { createGateway, CHAT_MODEL } from "../ai/gateway.server";
 import { SAFETY_CLASSIFIER_PROMPT } from "../ai/prompts";
