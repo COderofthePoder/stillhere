@@ -18,19 +18,20 @@ export async function analyzeSafety(
   try {
     const { provider } = createGateway();
     const context = recentContext.slice(-6).join("\n");
-    const { text } = await generateText({
+    const result = streamText({
       model: provider.responses(CHAT_MODEL),
       providerOptions: {
         openai: { store: false, forceReasoning: true, reasoningEffort: "low" },
       },
+      instructions: SAFETY_CLASSIFIER_PROMPT,
       messages: [
-        { role: "system", content: SAFETY_CLASSIFIER_PROMPT },
         {
           role: "user",
           content: `Kontext:\n${context || "(kein Kontext)"}\n\nLetzte Nachricht:\n${latestMessage}`,
         },
       ],
     });
+    const text = await result.text;
 
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) return floor;
