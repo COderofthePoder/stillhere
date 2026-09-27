@@ -63,14 +63,14 @@ export const Route = createFileRoute("/api/chat")({
 
         try {
           const { provider } = createGateway(getLovableAiGatewayRunId(request));
-          const modelMessages: ModelMessage[] = [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "system", content: safetyDirective(assessment.level) },
-            ...messages.map((message) => ({ role: message.role, content: message.content })),
-          ];
+          const modelMessages: ModelMessage[] = messages.map((message) => ({
+            role: message.role,
+            content: message.content,
+          }));
 
           const result = streamText({
             model: provider.responses(CHAT_MODEL),
+            instructions: `${SYSTEM_PROMPT}\n\n${safetyDirective(assessment.level)}`,
             messages: modelMessages,
             abortSignal: request.signal,
             providerOptions: responsesProviderOptions,
