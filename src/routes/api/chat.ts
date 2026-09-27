@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { streamText, type ModelMessage } from "ai";
 
-import { atLeast, type SafetyLevel } from "@/lib/safety/levels";
+import { atLeast, type SafetyLevel, type SafetySignals } from "@/lib/safety/levels";
 
 type IncomingMessage = { role: "user" | "assistant"; content: string };
 
-function suggestedActionsFor(level: SafetyLevel): string[] {
-  if (level === "IMMEDIATE") return ["call_144", "call_145", "call_143", "chat_143", "call_147", "stay_in_chat"];
-  if (level === "HIGH") return ["call_143", "chat_143", "sms_147", "trusted_person", "safety_plan"];
+function suggestedActionsFor(level: SafetyLevel, s: SafetySignals): string[] {
+  const line = s.young ? ["call_147", "sms_147", "call_143"] : ["call_143", "chat_143"];
+  if (level === "IMMEDIATE") return ["call_144", ...(s.ingestion ? ["call_145"] : []), ...line, "stay_in_chat"];
+  if (level === "HIGH") return [...(s.hasTherapist ? ["own_plan"] : []), ...line, "trusted_person", "safety_plan"];
   if (level === "ELEVATED") return ["safety_plan"];
   return [];
 }
@@ -86,12 +87,18 @@ export const Route = createFileRoute("/api/chat")({
           const headers = new Headers(response.headers);
           headers.set("Cache-Control", "no-store");
           headers.set("X-Safety-Level", assessment.level);
-          headers.set("X-Suggested-Actions", suggestedActionsFor(assessment.level).join(","));
+          headers.set("X-Suggested-Actions", suggestedActionsFor(assessment.level, assessment.signals).join(","));
           if (assessment.language) headers.set("X-Reply-Language", assessment.language);
           headers.set("X-Declines-Numbers", assessment.signals.declinesNumbers ? "1" : "0");
+          const flag = (value: boolean) => (value ? "1" : "0");
+          headers.set("X-Formal", flag(assessment.signals.formal));
+          headers.set("X-Young", flag(assessment.signals.young));
+          headers.set("X-Ingestion", flag(assessment.signals.ingestion));
+          headers.set("X-Deescalated", flag(assessment.signals.deescalated));
+          headers.set("X-Has-Plan", flag(assessment.signals.hasTherapist));
           headers.set(
             "Access-Control-Expose-Headers",
-            "X-Safety-Level, X-Suggested-Actions, X-Reply-Language, X-Declines-Numbers",
+            "X-Safety-Level, X-Suggested-Actions, X-Reply-Language, X-Declines-Numbers, X-Formal, X-Young, X-Ingestion, X-Deescalated, X-Has-Plan",
           );
           return new Response(response.body, { status: response.status, headers });
         } catch (error) {
