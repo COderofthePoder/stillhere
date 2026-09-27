@@ -61,8 +61,10 @@ export const Route = createFileRoute("/api/chat")({
           latest.content,
           messages.slice(0, -1).map((message) => `${message.role}: ${message.content}`),
         );
-        const prefs = (body.preferences ?? {}) as { noNumbers?: unknown };
+        const prefs = (body.preferences ?? {}) as { noNumbers?: unknown; formal?: unknown };
         if (prefs.noNumbers === true) assessment.signals.declinesNumbers = true;
+        // The UI locks the form of address after the first reply so it does not flip.
+        if (typeof prefs.formal === "boolean") assessment.signals.formal = prefs.formal;
         const uiLocale = ["de", "fr", "it", "en"].includes(body.locale as string)
           ? (body.locale as "de" | "fr" | "it" | "en")
           : null;
