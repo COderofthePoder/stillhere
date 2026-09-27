@@ -8,6 +8,8 @@ type Row = {
   category: string;
   phone: string | null;
   url: string | null;
+  sms: string | null;
+  chat_url: string | null;
   description: string | null;
   canton: string | null;
   age_min: number | null;
@@ -47,7 +49,7 @@ export const listSupportResources = createServerFn({ method: "GET" }).handler(as
 
   const { data, error } = await supabase
     .from("support_resources")
-    .select("slug, name, category, phone, url, description, canton, age_min, age_max, available_24_7, language")
+    .select("slug, name, category, phone, url, sms, chat_url, description, canton, age_min, age_max, available_24_7, language")
     .order("sort_order", { ascending: true });
 
   if (error) {
@@ -61,6 +63,8 @@ export const listSupportResources = createServerFn({ method: "GET" }).handler(as
     category: row.category as SupportResource["category"],
     phone: row.phone,
     url: row.url,
+    sms: row.sms,
+    chatUrl: row.chat_url,
     description: row.description ?? "",
     canton: row.canton,
     ageMin: row.age_min,

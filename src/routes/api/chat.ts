@@ -6,8 +6,8 @@ import { atLeast, type SafetyLevel } from "@/lib/safety/levels";
 type IncomingMessage = { role: "user" | "assistant"; content: string };
 
 function suggestedActionsFor(level: SafetyLevel): string[] {
-  if (level === "IMMEDIATE") return ["call_144", "call_143", "call_147", "stay_in_chat"];
-  if (level === "HIGH") return ["call_143", "trusted_person", "safety_plan"];
+  if (level === "IMMEDIATE") return ["call_144", "call_145", "call_143", "chat_143", "call_147", "stay_in_chat"];
+  if (level === "HIGH") return ["call_143", "chat_143", "sms_147", "trusted_person", "safety_plan"];
   if (level === "ELEVATED") return ["safety_plan"];
   return [];
 }
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        let body: { messages?: unknown; locale?: unknown };
+        let body: { messages?: unknown; locale?: unknown; preferences?: unknown };
         try {
           body = (await request.json()) as typeof body;
         } catch {
@@ -60,6 +60,12 @@ export const Route = createFileRoute("/api/chat")({
           latest.content,
           messages.slice(0, -1).map((message) => `${message.role}: ${message.content}`),
         );
+        const prefs = (body.preferences ?? {}) as { noNumbers?: unknown };
+        if (prefs.noNumbers === true) assessment.signals.declinesNumbers = true;
+        const uiLocale = ["de", "fr", "it", "en"].includes(body.locale as string)
+          ? (body.locale as "de" | "fr" | "it" | "en")
+          : null;
+        const replyLanguage = assessment.language ?? uiLocale;
 
         try {
           const { provider } = createGateway(getLovableAiGatewayRunId(request));
@@ -70,7 +76,7 @@ export const Route = createFileRoute("/api/chat")({
 
           const result = streamText({
             model: provider.responses(CHAT_MODEL),
-            instructions: `${SYSTEM_PROMPT}\n\n${safetyDirective(assessment.level)}`,
+            instructions: `${SYSTEM_PROMPT}\n\n${safetyDirective(assessment.level, assessment.signals, replyLanguage)}`,
             messages: modelMessages,
             abortSignal: request.signal,
             providerOptions: responsesProviderOptions,
@@ -81,9 +87,11 @@ export const Route = createFileRoute("/api/chat")({
           headers.set("Cache-Control", "no-store");
           headers.set("X-Safety-Level", assessment.level);
           headers.set("X-Suggested-Actions", suggestedActionsFor(assessment.level).join(","));
+          if (assessment.language) headers.set("X-Reply-Language", assessment.language);
+          headers.set("X-Declines-Numbers", assessment.signals.declinesNumbers ? "1" : "0");
           headers.set(
             "Access-Control-Expose-Headers",
-            "X-Safety-Level, X-Suggested-Actions",
+            "X-Safety-Level, X-Suggested-Actions, X-Reply-Language, X-Declines-Numbers",
           );
           return new Response(response.body, { status: response.status, headers });
         } catch (error) {

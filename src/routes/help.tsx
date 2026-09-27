@@ -5,7 +5,16 @@ import { useState } from "react";
 import { PageIntro, SiteLayout } from "@/components/SiteLayout";
 import { PhoneLink } from "@/components/ui/action-button";
 import { CANTONS } from "@/config/cantons";
-import { CRISIS_LINE, EMERGENCY, YOUTH_LINE, SUPPORT_RESOURCES } from "@/config/support-resources";
+import {
+  CRISIS_LINE,
+  EMERGENCY,
+  POLICE,
+  TOX_INFO,
+  YOUTH_LINE,
+  SUPPORT_RESOURCES,
+  smsHref,
+} from "@/config/support-resources";
+import { buttonClasses } from "@/components/ui/action-button";
 import { useCopy } from "@/i18n";
 import { listSupportResources } from "@/lib/support.functions";
 
@@ -44,12 +53,16 @@ function HelpNow() {
   const emergency = byId("144") ?? EMERGENCY;
   const crisis = byId("143") ?? CRISIS_LINE;
   const youth = byId("147") ?? YOUTH_LINE;
+  const tox = byId("145") ?? TOX_INFO;
+  const police = byId("117") ?? POLICE;
   const regional = resources.filter((resource) => resource.category === "regional" && resource.canton === canton);
 
   const options = [
     { title: copy.help.emergency.title, resource: emergency, urgent: true },
     { title: copy.help.talk.title, resource: crisis, urgent: false },
     { title: copy.help.youth.title, resource: youth, urgent: false },
+    { title: copy.help.tox.title, resource: tox, urgent: false },
+    { title: copy.help.police.title, resource: police, urgent: false },
   ];
 
   return (
@@ -62,7 +75,9 @@ function HelpNow() {
             <div className="min-w-40 flex-1">
               <p className="text-base text-muted-foreground">{title}</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">{resource.phone}</p>
-              <p className="mt-2 text-base text-muted-foreground">{resource.description}</p>
+              <p className="mt-2 text-base text-muted-foreground">
+                {copy.resources[resource.id] ?? resource.description}
+              </p>
             </div>
             <PhoneLink
               phone={resource.phone!}
@@ -70,11 +85,33 @@ function HelpNow() {
               size="lg"
               className="w-full sm:w-auto"
             >
-              {resource.phone} {copy.crisis.call}
+              {copy.crisis.callPattern.replace("{n}", resource.phone ?? "")}
             </PhoneLink>
+            {resource.chatUrl || resource.sms ? (
+              <div className="flex w-full flex-wrap items-center gap-3">
+                <span className="text-sm text-muted-foreground">{copy.help.written}</span>
+                {resource.sms ? (
+                  <a href={smsHref(resource.sms)} className={buttonClasses("secondary", "sm")}>
+                    SMS {resource.sms}
+                  </a>
+                ) : null}
+                {resource.chatUrl ? (
+                  <a
+                    href={resource.chatUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={buttonClasses("secondary", "sm")}
+                  >
+                    {resource.id === "147" ? copy.crisis.youthChatCta : copy.crisis.crisisChatCta}
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>
+
+      <p className="card-surface mt-6 p-6 text-base text-foreground">{copy.help.injury}</p>
 
       <section className="card-surface mt-6 p-6">
         <h2 className="text-xl font-semibold tracking-tight text-foreground">{copy.help.regional.title}</h2>
@@ -103,14 +140,14 @@ function HelpNow() {
                 <p className="mt-1 text-base text-muted-foreground">{resource.description}</p>
                 {resource.phone ? (
                   <PhoneLink phone={resource.phone} variant="primary" size="sm" className="mt-3">
-                    {resource.phone} {copy.crisis.call}
+                    {copy.crisis.callPattern.replace("{n}", resource.phone ?? "")}
                   </PhoneLink>
                 ) : null}
               </div>
             ))
-          ) : (
+          ) : canton ? (
             <p className="text-base text-muted-foreground">{copy.help.regional.placeholder}</p>
-          )}
+          ) : null}
           <p className="text-sm text-muted-foreground">{copy.help.regional.noLocation}</p>
         </div>
       </section>

@@ -16,6 +16,8 @@ export const de = {
     cta: "Anonym schreiben",
     mobilePlan: "Plan",
     mobileHelp: "Hilfe",
+    language: "Sprache",
+    about: "Über StillHere",
   },
   home: {
     heroTitle: "Du musst gerade nicht alles alleine tragen.",
@@ -75,6 +77,7 @@ export const de = {
     immediateText:
       "Wenn du unmittelbar gefährdet bist oder dir bereits etwas angetan hast, ruf 144 an oder geh zur nächsten Notfallstation.",
     stayInChat: "Ich bleibe im Chat",
+    emergencyBar: "Wenn du in Gefahr bist:",
     feedbackTitle: "War dieses Gespräch gerade hilfreich?",
     feedbackOptions: ["Ja", "Ein wenig", "Nein"],
     feedbackTextLabel: "Was hätte dir mehr geholfen?",
@@ -91,6 +94,16 @@ export const de = {
     youthTitle: "Kinder und Jugendliche",
     youthCta: "147 kontaktieren",
     call: "anrufen",
+    callPattern: "{n} anrufen",
+    crisisChatCta: "143 Chat öffnen",
+    youthSmsCta: "147 per SMS",
+    youthChatCta: "147 Chat & WhatsApp",
+    toxTitle: "Vergiftung oder Überdosis",
+    toxCta: "145 anrufen",
+    policeTitle: "Bedrohung durch andere",
+    policeCta: "117 anrufen",
+    writeCta: "Schreiben",
+    website: "Website",
   },
   safetyPlan: {
     title: "Safety Plan",
@@ -189,7 +202,13 @@ export const de = {
   },
   help: {
     title: "Hilfe jetzt",
-    intro: "Alles hier ist anonym und rund um die Uhr erreichbar.",
+    intro:
+      "Diese Seite ist anonym. Alle Nummern sind rund um die Uhr erreichbar. 143 und 147 kannst du anonym anrufen oder schreiben. Bei 144 und 117 ist der Anruf nicht anonym – das ist in Ordnung, damit dir schnell geholfen werden kann.",
+    tox: { title: "Vergiftung, Überdosis, Tabletten" },
+    police: { title: "Bedrohung durch andere" },
+    injury:
+      "Verletzt, aber nicht lebensbedrohlich? Hausärztin, Notfallpraxis oder das ärztliche Notfalltelefon deines Kantons helfen weiter. Bei starker Blutung oder Bewusstlosigkeit: 144.",
+    written: "Lieber schreiben als anrufen?",
     emergency: { title: "Akuter medizinischer Notfall", number: "144" },
     talk: { title: "Mit jemandem sprechen", number: "143" },
     youth: { title: "Unter 25", number: "147" },
@@ -197,7 +216,8 @@ export const de = {
       title: "Psychiatrische Hilfe in meiner Region",
       cantonLabel: "In welchem Kanton bist du?",
       cantonPlaceholder: "Kanton wählen (optional)",
-      placeholder: "Regionale psychiatrische Notfallangebote werden hier ergänzt.",
+      placeholder:
+        "Für diesen Kanton haben wir noch keine geprüften regionalen Angebote. Die Nummern oben gelten in der ganzen Schweiz, und jede Notfallstation hilft auch bei psychischen Krisen.",
       noLocation: "Wir fragen deinen Standort nicht ab.",
     },
   },
@@ -243,6 +263,13 @@ export const de = {
       },
     ],
   },
+  resources: {
+    "144": "Bei unmittelbarer Gefahr oder wenn du dir bereits etwas angetan hast.",
+    "143": "Anonyme Unterstützung rund um die Uhr. Telefon und Chat.",
+    "147": "Für Kinder und Jugendliche bis 25. Anonym, kostenlos, jederzeit. Telefon, SMS, Chat und WhatsApp.",
+    "145": "Bei Vergiftung, Überdosis oder Einnahme von Medikamenten, Alkohol oder Drogen. Rund um die Uhr.",
+    "117": "Wenn du oder jemand anderes durch eine andere Person bedroht wird.",
+  } as Record<string, string>,
   common: {
     back: "Zurück",
     close: "Schliessen",
@@ -250,4 +277,14 @@ export const de = {
   },
 } as const;
 
-export type Copy = typeof de;
+type Widen<T> = T extends `/${string}`
+  ? T
+  : T extends string
+    ? string
+    : T extends readonly (infer U)[]
+      ? readonly Widen<U>[]
+      : T extends object
+        ? { readonly [K in keyof T]: Widen<T[K]> }
+        : T;
+
+export type Copy = Widen<typeof de>;
